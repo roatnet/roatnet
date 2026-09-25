@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="ROAT Dictionary — The definitive source for words you won't find anywhere else. Created by roat." />
+  <title>ROAT Dictionary</title>
+  <link rel="icon" type="image/jpeg" href="/logo.jpg" />
+  <link href="https://fonts.googleapis.com/css2?family=Trebuchet+MS&family=Outfit:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/src/style.css" />
+</head>
+<body>
+  <div id="app">
+    <!-- Starfield background -->
+    <canvas id="starfield"></canvas>
+
+    <!-- Toolbar / Navigation -->
+    <header id="toolbar">
+      <div class="toolbar-inner">
+        <a href="#" id="nav-home" class="toolbar-logo" onclick="navigateTo('home')">
+          <img src="/logo.jpg" alt="ROAT Dictionary" class="logo-img" />
+        </a>
+        <nav class="toolbar-nav">
+          <a href="#" id="nav-browse" class="nav-pill" onclick="navigateTo('browse')">
+            <span class="nav-icon">📖</span> Browse
+          </a>
+          <a href="#" id="nav-search-link" class="nav-pill" onclick="navigateTo('home')">
+            <span class="nav-icon">🔍</span> Search
+          </a>
+          <a href="#" id="nav-random" class="nav-pill" onclick="loadRandomWord()">
+            <span class="nav-icon">🎲</span> Random
+          </a>
+        </nav>
+        <div class="toolbar-actions">
+          <div id="auth-section">
+            <!-- Filled by JS -->
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main id="main-content">
+      <!-- HOME / SEARCH PAGE -->
+      <section id="page-home" class="page active">
+        <div class="hero-section">
+          <img src="/logo.jpg" alt="ROAT Dictionary" class="hero-logo" />
+          <p class="hero-tagline">✦ The Definitive Source for Words You Won't Find Anywhere Else ✦</p>
+          <div class="search-container">
+            <div class="search-box">
+              <span class="search-icon">🔍</span>
+              <input type="text" id="search-input" placeholder="Search the ROAT dictionary..." autocomplete="off" />
+              <button id="search-btn" class="btn-glossy btn-search" onclick="performSearch()">Search</button>
+            </div>
+            <div id="search-suggestions" class="search-suggestions hidden"></div>
+          </div>
+          <div class="stats-bar">
+            <div class="stat-item">
+              <span class="stat-number" id="total-words">0</span>
+              <span class="stat-label">Words Defined</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-number" id="total-audio">0</span>
+              <span class="stat-label">Audio Clips</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-number" id="latest-date">—</span>
+              <span class="stat-label">Last Updated</span>
+            </div>
+          </div>
+        </div>
+        <!-- Word of the Day -->
+        <div class="wotd-section" id="wotd-section">
+          <h2 class="section-title">⭐ Word of the Day</h2>
+          <div id="wotd-card" class="word-card wotd-card">
+            <p class="wotd-loading">Loading...</p>
+          </div>
+        </div>
+        <!-- Recently Added -->
+        <div class="recent-section">
+          <h2 class="section-title">🆕 Recently Added</h2>
+          <div id="recent-words" class="words-grid">
+            <p class="loading-text">Loading...</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- BROWSE PAGE -->
+      <section id="page-browse" class="page">
+        <div class="browse-header">
+          <h1 class="page-title">📖 Browse Dictionary</h1>
+          <div class="alphabet-bar" id="alphabet-bar">
+            <button class="alpha-btn active" data-letter="ALL" onclick="filterByLetter('ALL')">ALL</button>
+          </div>
+        </div>
+        <div id="browse-results" class="words-list">
+          <p class="loading-text">Loading words...</p>
+        </div>
+      </section>
+
+      <!-- WORD DETAIL PAGE -->
+      <section id="page-word" class="page">
+        <div id="word-detail" class="word-detail-container">
+          <p class="loading-text">Loading word...</p>
+        </div>
+      </section>
+
+      <!-- LOGIN PAGE -->
+      <section id="page-login" class="page">
+        <div class="auth-container">
+          <div class="auth-card glass-card">
+            <img src="/logo.jpg" alt="ROAT" class="auth-logo" />
+            <h2 class="auth-title" id="auth-title">Sign In</h2>
+            <p class="auth-subtitle">Enter the ROAT universe</p>
+            <form id="auth-form" onsubmit="handleAuth(event)">
+              <div class="form-group">
+                <label for="auth-email">Email</label>
+                <input type="email" id="auth-email" class="input-glossy" required placeholder="you@example.com" />
+              </div>
+              <div class="form-group">
+                <label for="auth-password">Password</label>
+                <input type="password" id="auth-password" class="input-glossy" required placeholder="••••••••" />
+              </div>
+              <button type="submit" class="btn-glossy btn-primary btn-full" id="auth-submit-btn">Sign In</button>
+              <p class="auth-error hidden" id="auth-error"></p>
+            </form>
+            <div class="auth-toggle">
+              <span id="auth-toggle-text">Don't have an account?</span>
+              <a href="#" id="auth-toggle-link" onclick="toggleAuthMode()">Sign Up</a>
+            </div>
+            <a href="#" class="auth-skip" onclick="navigateTo('home')">← Skip, just browse</a>
+          </div>
+        </div>
+      </section>
+
+      <!-- ADD WORD PAGE (Admin only) -->
+      <section id="page-add" class="page">
+        <div class="add-word-container">
+          <div class="add-word-card glass-card">
+            <h1 class="page-title">✏️ Add New Word</h1>
+            <p class="admin-badge">🔒 @roat Contributors Only</p>
+            <form id="add-word-form" onsubmit="handleAddWord(event)">
+              <div class="form-row">
+                <div class="form-group flex-2">
+                  <label for="word-input">Word *</label>
+                  <input type="text" id="word-input" class="input-glossy" required placeholder="e.g. roatified" />
+                </div>
+                <div class="form-group flex-1">
+                  <label for="word-pos">Part of Speech *</label>
+                  <select id="word-pos" class="input-glossy" required>
+                    <option value="">Select...</option>
+                    <option value="noun">Noun</option>
+                    <option value="verb">Verb</option>
+                    <option value="adjective">Adjective</option>
+                    <option value="adverb">Adverb</option>
+                    <option value="pronoun">Pronoun</option>
+                    <option value="preposition">Preposition</option>
+                    <option value="conjunction">Conjunction</option>
+                    <option value="interjection">Interjection</option>
+                    <option value="exclamation">Exclamation</option>
+                    <option value="phrase">Phrase</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group flex-1">
+                  <label for="word-phonetic">Phonetic Spelling *</label>
+                  <input type="text" id="word-phonetic" class="input-glossy" required placeholder="e.g. /ˈroʊ.tɪ.faɪd/" />
+                </div>
+                <div class="form-group flex-1">
+                  <label for="word-syllables">Syllables</label>
+                  <input type="text" id="word-syllables" class="input-glossy" placeholder="e.g. roat·i·fied" />
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="word-definition">Definition *</label>
+                <textarea id="word-definition" class="input-glossy" required rows="3" placeholder="The primary meaning of the word..."></textarea>
+              </div>
+
+              <div class="form-group">
+                <label for="word-example">Example Sentence</label>
+                <textarea id="word-example" class="input-glossy" rows="2" placeholder="Use the word in a sentence..."></textarea>
+              </div>
+
+              <div class="form-group">
+                <label for="word-etymology">Etymology / Origin</label>
+                <textarea id="word-etymology" class="input-glossy" rows="2" placeholder="Where did this word come from?"></textarea>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group flex-1">
+                  <label for="word-synonyms">Synonyms</label>
+                  <input type="text" id="word-synonyms" class="input-glossy" placeholder="comma-separated" />
+                </div>
+                <div class="form-group flex-1">
+                  <label for="word-antonyms">Antonyms</label>
+                  <input type="text" id="word-antonyms" class="input-glossy" placeholder="comma-separated" />
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="word-audio">Audio Pronunciation</label>
+                <input type="file" id="word-audio" class="input-glossy input-file" accept="audio/*" />
+                <p class="input-hint">Upload an MP3 or WAV file of the pronunciation</p>
+              </div>
+
+              <div class="form-group">
+                <label for="word-tags">Tags</label>
+                <input type="text" id="word-tags" class="input-glossy" placeholder="comma-separated, e.g. slang, roat-original" />
+              </div>
+
+              <div class="form-actions">
+                <button type="submit" class="btn-glossy btn-primary" id="add-word-btn">
+                  ✨ Add to Dictionary
+                </button>
+                <button type="button" class="btn-glossy btn-secondary" onclick="document.getElementById('add-word-form').reset()">
+                  🗑️ Clear
+                </button>
+              </div>
+              <p class="auth-error hidden" id="add-error"></p>
+              <p class="auth-success hidden" id="add-success"></p>
+            </form>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Footer -->
+    <footer id="footer">
+      <div class="footer-inner">
+        <div class="footer-marquee">
+          <div class="marquee-content">
+            ★ ROAT DICTIONARY ★ Est. 2025 ★ Words You Won't Find Anywhere Else ★ ROAT DICTIONARY ★ Est. 2025 ★ Words You Won't Find Anywhere Else ★
+          </div>
+        </div>
+        <div class="footer-links">
+          <span>© 2025 ROAT Dictionary</span>
+          <span class="footer-sep">|</span>
+          <span>Made with 💎 by @roat</span>
+          <span class="footer-sep">|</span>
+          <span class="visitor-counter">
+            <img src="https://hits.seeyoufarm.com/api/count/incr/badge.svg?url=https%3A%2F%2Froat.net&count_bg=%2379C83D&title_bg=%23555555&icon=&icon_color=%23E7E7E7&title=visitors&edge_flat=false" alt="visitor counter" style="height:18px;vertical-align:middle" />
+          </span>
+        </div>
+      </div>
+    </footer>
+  </div>
+
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>
